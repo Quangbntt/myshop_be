@@ -1,0 +1,60 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
+
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
+    Route::post('login', 'AuthController@login');
+    Route::get('logout', 'AuthController@logout');
+
+    Route::get('/home', 'HomeController@index')->name('home');
+    Route::group(['prefix'=>'user','namespace' =>'User'], function () {
+        Route::get('all', 'UserController@index');
+        Route::post('create', 'UserController@create');
+        Route::post('update', 'UserController@update');
+        Route::post('delete', 'UserController@delete');
+        Route::get('getUserInfor', 'UserController@getUserInfor');
+        Route::get('getUserPhone', 'UserController@getUserPhone');
+        Route::get('changeStatus','UserController@changeStatus');
+    });
+    Route::group(['prefix'=>'role','namespace' =>'Role'], function () {
+        Route::get('getAll', 'RoleController@getAll');
+    });
+    Route::group(['prefix'=>'product','namespace' =>'Product'], function () {
+        Route::get('all', 'ProductController@index');
+    });
+    Route::group(['prefix'=>'branch','namespace' =>'Branch'], function () {
+        Route::get('all', 'BranchController@index');
+        Route::post('create', 'BranchController@create');
+        Route::post('update', 'BranchController@update');
+        Route::post('delete', 'BranchController@delete');
+    });
+    Route::group(['prefix'=>'category','namespace' =>'Category'], function () {
+        Route::get('all', 'CategoryController@index');
+        Route::post('create', 'CategoryController@create');
+        Route::post('update', 'CategoryController@update');
+        Route::get('changeStatus','CategoryController@changeStatus');
+        Route::get('getCategoryInfor', 'CategoryController@getCategoryInfor');
+
+    });
+    Route::group(['prefix'=>'feedback','namespace' =>'Feedback'], function () {
+        Route::get('all', 'FeedbackController@index');
+        Route::post('create', 'FeedbackController@create');
+    });
+    Route::group(['prefix'=>'menu','namespace' =>'Menu'], function () {
+        Route::get('list', 'MenuController@getMenu');
+    });
+

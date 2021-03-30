@@ -35,9 +35,22 @@ use Illuminate\Support\Facades\Route;
     });
     Route::group(['prefix'=>'product','namespace' =>'Product'], function () {
         Route::get('all', 'ProductController@index');
+        Route::post('create', 'ProductController@create');
+        Route::get('slide', 'ProductController@slide');
+        Route::get('feature', 'ProductController@featureProduct');
+        Route::get('recent', 'ProductController@recentProduct');
+        Route::get('hot', 'ProductController@hotProduct');
+        Route::get('list-name', 'ProductController@listProductName');
+        Route::get('search', 'ProductController@searchProduct');
+        Route::get('detail', 'ProductController@productDetail');
+        Route::get('same', 'ProductController@sameProduct');
+        Route::get('list-admin', 'ProductController@listProductAdmin');
+
     });
     Route::group(['prefix'=>'branch','namespace' =>'Branch'], function () {
         Route::get('all', 'BranchController@index');
+        Route::get('list', 'BranchController@list');
+        Route::get('list-name', 'BranchController@listBranchName');
         Route::post('create', 'BranchController@create');
         Route::post('update', 'BranchController@update');
         Route::post('delete', 'BranchController@delete');

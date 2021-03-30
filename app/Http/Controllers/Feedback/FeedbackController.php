@@ -16,13 +16,22 @@ class FeedbackController extends Controller
      */
     public function index()
     {
-        // $feedback = new Feedback;
-        // $feedback->customerid=2;
-        // $feedback->comment="Tôi vô cùng hài lòng";
-        // $feedback->rate=5;
-        // $feedback->save();
-        $data = DB::table('feedback')->get();
-        return response()->json($data);
+        $data = DB::table('feedback')
+        ->select(DB::raw(
+            'feedback_id,
+            feedback_comment,
+            feedback_customer_id,
+            feedback_rate,
+            users.name,
+            users.address,
+            users.status,
+            users.user_image'
+        ))
+        ->join('users', 'users.id', '=', 'feedback.feedback_customer_id')
+        ->where('users.status', 1)
+        ->get();
+        $arrReturn['data']= $data;
+        return response()->json($arrReturn);
     }
 
     /**

@@ -14,19 +14,132 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        // $productName = $request->get('productName');
-        // $arrProductName      = (array)$request->get('productName');
-        $data = DB::table('products');
-        // ->whereBetween('created_at', [$request['startDate'], $request['endDate']]);
-        // ->whereBetween('created_at', '2020-01-01', '2020-01-31');
-        // if($productName) {
-        //     $data = $data->where('name','LIKE','%'.$productName.'%');
-        // }
-        $response = $data->paginate($request['size'] ?? 10)->toArray();
+        $sex = $request->get('sex');
+        $product_id = $request->get('product');
+        $category = $request->get('category');
+        $branch_id = $request->get('branch');
+        $price_from = $request->get('price_from') ?? 0;
+        $price_to = $request->get('price_to') ?? 100000000;
+        $data = DB::table('products')->whereBetween('product_price', [$price_from, $price_to]);
+        if ($sex) {
+            $data = $data->where('sex', $request['sex']);
+        }
+        if ($product_id) {
+            $data = $data->whereIn('product_id', $product_id);
+        }
+        if ($branch_id) {
+            $data = $data->whereIn('product_code', $branch_id);
+        }
+        if ($category) {
+            $data = $data->join('categories', 'categories_id', 'product_category_id')->whereIn('categories.categories_parentid', $category);
+        }
+
+
+        $response = $data->paginate($request['size'] ?? 10);
+        foreach ($response as $key => $item) {
+            $item->product_more_image = unserialize($item->product_more_image);
+        }
         return response()->json($response);
     }
+    public function listProductAdmin(Request $request)
+    {
+        $sex = $request->get('sex');
+        $product_id = $request->get('product');
+        $category = $request->get('category');
+        $branch_id = $request->get('branch');
+        $price_from = $request->get('price_from') ?? 0;
+        $price_to = $request->get('price_to') ?? 100000000;
+        $data = DB::table('products')->join('product_sizes', 'product_sizes.product_id', '=', 'products.product_id')->whereBetween('product_price', [$price_from, $price_to]);
+        if ($sex) {
+            $data = $data->where('sex', $request['sex']);
+        }
+        if ($product_id) {
+            $data = $data->whereIn('product_id', $product_id);
+        }
+        if ($branch_id) {
+            $data = $data->whereIn('product_code', $branch_id);
+        }
+        if ($category) {
+            $data = $data->join('categories', 'categories_id', 'product_category_id')->whereIn('categories.categories_parentid', $category);
+        }
+        foreach ($data as $key=>$item) {
+            $dataChild = DB::table('products')
+                ->select(
+                    'product_sizes.size_id as id',
+                    'product_sizes.color',
+                    'product_sizes.size_name as size_name',
+                    'product_sizes.product_count as product_count',
+                    'product_sizes.created_at as created_at'
+                )->join('product_sizes', 'product_sizes.product_id', '=', 'products.product_id')->whereBetween('product_price', [$price_from, $price_to])->get();
+            $item['product'] = $dataChild;
+        }
+
+        $response = $data->paginate($request['size'] ?? 10);
+        foreach ($response as $key => $item) {
+            $item->product_more_image = unserialize($item->product_more_image);
+        }
+        return response()->json($response);
+    }
+    public function slide()
+    {
+        $data = DB::table('products')
+            ->select('product_id', 'product_name', 'product_description', 'product_image', 'product_price', 'product_status', 'product_rate')
+            ->where('product_status', 1)
+            ->orderByDesc('created_at')
+            ->limit(3)
+            ->get();
+        $arrReturn['data'] = $data;
+        return response()->json($arrReturn);
+    }
+    public function featureProduct()
+    {
+        $data = DB::table('products')
+            ->select('product_id', 'product_name', 'product_description', 'product_image', 'product_price', 'product_status', 'product_viewcount', 'product_rate')
+            ->where('product_status', 1)
+            ->orderByDesc('product_viewcount')
+            ->limit(8)
+            ->get();
+        $arrReturn['data'] = $data;
+        return response()->json($arrReturn);
+    }
+    public function hotProduct()
+    {
+        $data = DB::table('products')
+            ->select('product_id', 'product_name', 'product_description', 'product_image', 'product_price', 'product_status', 'product_viewcount', 'product_rate')
+            ->where('product_status', 1)
+            ->orderByDesc('product_rate')
+            ->limit(5)
+            ->get();
+        $arrReturn['data'] = $data;
+        return response()->json($arrReturn);
+    }
+    public function recentProduct()
+    {
+        $data = DB::table('products')
+            ->select('product_id', 'product_name', 'product_description', 'product_image', 'product_price', 'product_status', 'product_viewcount', 'product_rate')
+            ->where('product_status', 1)
+            ->orderByDesc('created_at')
+            ->limit(8)
+            ->get();
+        $arrReturn['data'] = $data;
+        return response()->json($arrReturn);
+    }
+    public function sameProduct(Request $request)
+    {
+        $id = $request->get('id');
+        $category_id = DB::table('products')->select('product_category_id')->where('product_id', $id)->get();
+        $data = DB::table('products')
+            ->where('product_category_id', $category_id[0]->product_category_id)
+            ->where('product_id', '!=', $id)
+            ->orderByDesc('created_at')
+            ->limit(8)
+            ->get();
+        $arrReturn['data'] = $data;
+        return response()->json($arrReturn);
+    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -36,40 +149,103 @@ class ProductController extends Controller
     public function create(Request $request)
     {
         $data = $request->all();
-        $user = new Product;
+        $product = new Product;
 
-        $name = (!empty($data['name'])) ? $data['name'] : '';
-        $code = (!empty($data['code'])) ? $data['code'] : '';
-        $metatitle = (!empty($data['metatitle'])) ? $data['metatitle'] : '';
-        $description = (!empty($data['description'])) ? $data['description'] : '';
-        $image = (!empty($data['image'])) ? $data['image'] : '';
-        $promotion = (!empty($data['promotion'])) ? $data['promotion'] : '';
-        $includedvat = (!empty($data['includedvat'])) ? $data['includedvat'] : '';
-        $price = (!empty($data['price'])) ? $data['price'] : '';
-        $quantity = (!empty($data['quantity'])) ? $data['quantity'] : '';
-        $categoryid = (!empty($data['categoryid'])) ? $data['categoryid'] : '';
-        $detail = (!empty($data['detail'])) ? $data['detail'] : '';
-        $viewcount = (!empty($data['viewcount'])) ? $data['viewcount'] : '';
-        $material = (!empty($data['material'])) ? $data['material'] : '';
-        $color = (!empty($data['color'])) ? $data['color'] : '';
-        $size = (!empty($data['size'])) ? $data['size'] : '';
+        $size_id = (!empty($data['size_id'])) ? $data['size_id'] : 0;
+        $product_name = (!empty($data['product_name'])) ? $data['product_name'] : '';
+        $product_code = (!empty($data['product_code'])) ? $data['product_code'] : '';
+        $product_metatitle = (!empty($data['product_metatitle'])) ? $data['product_metatitle'] : '';
+        $product_description = (!empty($data['product_description'])) ? $data['product_description'] : '';
+        $product_more_image = (!empty($data['product_more_image'])) ? $data['product_more_image'] : '';
+        $product_image = (!empty($data['product_image'])) ? $data['product_image'] : '';
+        $product_promotion = (!empty($data['product_promotion'])) ? $data['product_promotion'] : '';
+        $product_includedvat = (!empty($data['product_includedvat'])) ? $data['product_includedvat'] : 1;
+        $product_price = (!empty($data['product_price'])) ? $data['product_price'] : '';
+        $product_quantity = (!empty($data['product_quantity'])) ? $data['product_quantity'] : '';
+        $product_categoryid = (!empty($data['product_categoryid'])) ? $data['product_categoryid'] : '';
+        $product_detail = (!empty($data['product_detail'])) ? $data['product_detail'] : 'NULL';
+        $product_status = (!empty($data['product_status'])) ? $data['product_status'] : '';
+        $product_viewcount = (!empty($data['product_viewcount'])) ? $data['product_viewcount'] : 0;
+        $product_rate = (!empty($data['product_rate'])) ? $data['product_rate'] : '';
+        $product_material = (!empty($data['product_material'])) ? $data['product_material'] : '';
+        $product_size = (!empty($data['product_size'])) ? $data['product_size'] : '';
+        $product_sex = (!empty($data['product_sex'])) ? $data['product_sex'] : '';
 
-        $user->name = $name;
-        $user->code = $code;
-        $user->metatitle = $metatitle;
-        $user->description = $description;
-        $user->image = $image;
-        $user->promotion = $promotion;
-        $user->includedvat = $includedvat;
-        $user->price = $price;
-        $user->quantity = $quantity;
-        $user->categoryid = $categoryid;
-        $user->detail = $detail;
-        $user->viewcount = $viewcount;
-        $user->material = $material;
-        $user->color = $color;
-        $user->size = $size;
-        $user->status = $data['status'];
-        $user->save();
+        $product->size_id = $size_id;
+        $product->product_name = $product_name;
+        $product->product_code = $product_code;
+        $product->product_metatitle = $product_metatitle;
+        $product->product_description = $product_description;
+        $product->product_more_image = serialize(array($product_more_image));
+        $product->product_image = $product_image;
+        $product->product_promotion = $product_promotion;
+        $product->product_includedvat = $product_includedvat;
+        $product->product_price = $product_price;
+        $product->product_quantity = $product_quantity;
+        $product->product_category_id = $product_categoryid;
+        $product->product_detail = $product_detail;
+        $product->product_status = $product_status;
+        $product->product_viewcount = $product_viewcount;
+        $product->product_rate = $product_rate;
+        $product->product_material = $product_material;
+        $product->product_size = $product_size;
+        $product->sex = $product_sex;
+        $product->save();
+    }
+    public function listProductName()
+    {
+        $data = DB::table('products')
+            ->select('product_id as id', 'product_name as name')->get();
+        $response = [
+            'data' => $data
+        ];
+        return response()->json($response);
+    }
+    public function searchProduct(Request $request)
+    {
+        $name = $request->get('name');
+        if ($name) {
+            $data = DB::table('products')
+                ->selectRaw('product_id as id, product_name as label');
+            $data = $data->where('product_name', 'LIKE', '%' . $name . '%');
+            $data = $data->paginate(10);
+            return response()->json($data);
+        } else {
+            $arrReturn['data'] = [];
+            return response()->json($arrReturn);
+        }
+    }
+    public function productDetail(Request $request)
+    {
+        $id = $request->get('id');
+        $data = DB::table('products')->where('product_id', $id)->get();
+        $res = new Product();
+        // $data = $data->paginate(10);
+        foreach ($data as $key => $item) {
+            $res->product_id = $item->product_id;
+            $res->size_id = $item->size_id;
+            $res->product_name = $item->product_name;
+            $res->product_code = $item->product_code;
+            $res->product_metatitle = $item->product_metatitle;
+            $res->product_description = $item->product_description;
+            foreach (unserialize($item->product_more_image) as $index => $itemC) {
+                $res->product_more_image = $itemC;
+            }
+            $res->product_image = $item->product_image;
+            $res->product_promotion = $item->product_promotion;
+            $res->product_includedvat = $item->product_includedvat;
+            $res->product_price = $item->product_price;
+            $res->product_quantity = $item->product_quantity;
+            $res->product_category_id = $item->product_category_id;
+            $res->product_detail = $item->product_detail;
+            $res->product_status = $item->product_status;
+            $res->product_viewcount = $item->product_viewcount;
+            $res->product_rate = $item->product_rate;
+            $res->product_material = $item->product_material;
+            $res->product_size = $item->product_size;
+            $res->created_at = $item->created_at;
+            $res->sex = $item->sex;
+        }
+        return $res;
     }
 }

@@ -44,7 +44,7 @@ class UserController extends Controller
                     break;
             }
         }
-        $response = $data->paginate($request['size'] ?? 10)->toArray();
+        $response = $data->paginate($request['size'] ?? 10);
         return response()->json($response);
     }
 

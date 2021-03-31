@@ -51,7 +51,7 @@ class ProductController extends Controller
         $branch_id = $request->get('branch');
         $price_from = $request->get('price_from') ?? 0;
         $price_to = $request->get('price_to') ?? 100000000;
-        $data = DB::table('products')->join('product_sizes', 'product_sizes.product_id', '=', 'products.product_id')->whereBetween('product_price', [$price_from, $price_to]);
+        $data = DB::table('products')->whereBetween('product_price', [$price_from, $price_to]);
         if ($sex) {
             $data = $data->where('sex', $request['sex']);
         }
@@ -64,19 +64,19 @@ class ProductController extends Controller
         if ($category) {
             $data = $data->join('categories', 'categories_id', 'product_category_id')->whereIn('categories.categories_parentid', $category);
         }
-        foreach ($data as $key=>$item) {
-            $dataChild = DB::table('products')
+        $data = $data->get();
+        foreach ($data as &$item) {
+            $dataChild = DB::table('product_sizes')
                 ->select(
                     'product_sizes.size_id as id',
-                    'product_sizes.color',
-                    'product_sizes.size_name as size_name',
-                    'product_sizes.product_count as product_count',
+                    'color',
+                    'size_name as size_name',
+                    'product_count as product_count',
                     'product_sizes.created_at as created_at'
-                )->join('product_sizes', 'product_sizes.product_id', '=', 'products.product_id')->whereBetween('product_price', [$price_from, $price_to])->get();
-            $item['product'] = $dataChild;
+                )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $item->product_id)->get();
+            $item->product = $dataChild;
         }
-
-        $response = $data->paginate($request['size'] ?? 10);
+        $response = array_slice($data->toArray(), $request['page'] ?? 0, $request['limit'] ?? 10);
         foreach ($response as $key => $item) {
             $item->product_more_image = unserialize($item->product_more_image);
         }

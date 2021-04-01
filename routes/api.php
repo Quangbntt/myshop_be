@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Route;
     Route::group(['prefix'=>'product','namespace' =>'Product'], function () {
         Route::get('all', 'ProductController@index');
         Route::post('create', 'ProductController@create');
+        Route::post('update', 'ProductController@update');
         Route::get('slide', 'ProductController@slide');
         Route::get('feature', 'ProductController@featureProduct');
         Route::get('recent', 'ProductController@recentProduct');
@@ -45,6 +46,7 @@ use Illuminate\Support\Facades\Route;
         Route::get('detail', 'ProductController@productDetail');
         Route::get('same', 'ProductController@sameProduct');
         Route::get('list-admin', 'ProductController@listProductAdmin');
+        Route::post('delete', 'ProductController@delete');
 
     });
     Route::group(['prefix'=>'branch','namespace' =>'Branch'], function () {
@@ -61,6 +63,7 @@ use Illuminate\Support\Facades\Route;
         Route::post('update', 'CategoryController@update');
         Route::get('changeStatus','CategoryController@changeStatus');
         Route::get('getCategoryInfor', 'CategoryController@getCategoryInfor');
+        Route::get('info', 'CategoryController@info');
 
     });
     Route::group(['prefix'=>'feedback','namespace' =>'Feedback'], function () {

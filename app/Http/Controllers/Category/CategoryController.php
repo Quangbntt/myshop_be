@@ -138,6 +138,21 @@ class CategoryController extends Controller
         ];
         return response()->json($response);
     }
+    // Api thông tin loại sản phẩm
+    public function info()
+    {
+        $data = DB::table('categories')
+            ->select(
+                'categories_id as id',
+                'categories_name as name'
+            )
+            ->where('categories_parentid', '!=', 0)
+            ->get();
+        $response = [
+            'data' => $data
+        ];
+        return response()->json($response);
+    }
     //Api đổi trạng thái loại sản phẩm
     public function changeStatus(Request $request)
     {

@@ -76,7 +76,8 @@ class ProductController extends Controller
                 )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $item->product_id)->get();
             $item->product = $dataChild;
         }
-        $response = array_slice($data->toArray(), $request['page'] ?? 0, $request['limit'] ?? 10);
+        // $response = array_slice($data->toArray(), $request['page'] ?? 0, $request['limit'] ?? 10);
+        $response = $data->toArray();
         foreach ($response as $key => $item) {
             $item->product_more_image = unserialize($item->product_more_image);
         }
@@ -162,14 +163,14 @@ class ProductController extends Controller
         $product_includedvat = (!empty($data['product_includedvat'])) ? $data['product_includedvat'] : 1;
         $product_price = (!empty($data['product_price'])) ? $data['product_price'] : '';
         $product_quantity = (!empty($data['product_quantity'])) ? $data['product_quantity'] : '';
-        $product_categoryid = (!empty($data['product_categoryid'])) ? $data['product_categoryid'] : '';
+        $product_category_id = (!empty($data['product_category_id'])) ? $data['product_category_id'] : '';
         $product_detail = (!empty($data['product_detail'])) ? $data['product_detail'] : 'NULL';
-        $product_status = (!empty($data['product_status'])) ? $data['product_status'] : '';
+        $product_status = (!empty($data['product_status'])) ? $data['product_status'] : 1;
         $product_viewcount = (!empty($data['product_viewcount'])) ? $data['product_viewcount'] : 0;
-        $product_rate = (!empty($data['product_rate'])) ? $data['product_rate'] : '';
-        $product_material = (!empty($data['product_material'])) ? $data['product_material'] : '';
-        $product_size = (!empty($data['product_size'])) ? $data['product_size'] : '';
-        $product_sex = (!empty($data['product_sex'])) ? $data['product_sex'] : '';
+        $product_rate = (!empty($data['product_rate'])) ? $data['product_rate'] : 5;
+        $product_material = (!empty($data['product_material'])) ? $data['product_material'] : 0;
+        $product_size = (!empty($data['product_size'])) ? $data['product_size'] : 0;
+        $product_sex = (!empty($data['product_sex'])) ? $data['product_sex'] : 0;
 
         $product->size_id = $size_id;
         $product->product_name = $product_name;
@@ -182,7 +183,7 @@ class ProductController extends Controller
         $product->product_includedvat = $product_includedvat;
         $product->product_price = $product_price;
         $product->product_quantity = $product_quantity;
-        $product->product_category_id = $product_categoryid;
+        $product->product_category_id = $product_category_id;
         $product->product_detail = $product_detail;
         $product->product_status = $product_status;
         $product->product_viewcount = $product_viewcount;
@@ -191,6 +192,57 @@ class ProductController extends Controller
         $product->product_size = $product_size;
         $product->sex = $product_sex;
         $product->save();
+    }
+    public function update(Request $request)
+    {
+        $data = $request->all();
+
+        $size_id = (!empty($data['size_id'])) ? $data['size_id'] : 0;
+        $product_name = (!empty($data['product_name'])) ? $data['product_name'] : '';
+        $product_code = (!empty($data['product_code'])) ? $data['product_code'] : '';
+        $product_metatitle = (!empty($data['product_metatitle'])) ? $data['product_metatitle'] : '';
+        $product_description = (!empty($data['product_description'])) ? $data['product_description'] : '';
+        $product_more_image = (!empty($data['product_more_image'])) ? $data['product_more_image'] : '';
+        $product_image = (!empty($data['product_image'])) ? $data['product_image'] : '';
+        $product_promotion = (!empty($data['product_promotion'])) ? $data['product_promotion'] : '';
+        $product_includedvat = (!empty($data['product_includedvat'])) ? $data['product_includedvat'] : 1;
+        $product_price = (!empty($data['product_price'])) ? $data['product_price'] : '';
+        $product_quantity = (!empty($data['product_quantity'])) ? $data['product_quantity'] : '';
+        $product_category_id = (!empty($data['product_category_id'])) ? $data['product_category_id'] : '';
+        $product_detail = (!empty($data['product_detail'])) ? $data['product_detail'] : 'NULL';
+        $product_status = (!empty($data['product_status'])) ? $data['product_status'] : 1;
+        $product_viewcount = (!empty($data['product_viewcount'])) ? $data['product_viewcount'] : 0;
+        $product_rate = (!empty($data['product_rate'])) ? $data['product_rate'] : 5;
+        $product_material = (!empty($data['product_material'])) ? $data['product_material'] : 0;
+        $product_size = (!empty($data['product_size'])) ? $data['product_size'] : 0;
+        $product_sex = (!empty($data['product_sex'])) ? $data['product_sex'] : 0;
+
+        DB::table('products')
+            ->where('product_id', '=', $data['product_id'])
+            ->update([
+                'size_id'  => $size_id,
+                'product_name'  => $product_name,
+                'product_code'     => $product_code,
+                'product_metatitle'   => $product_metatitle,
+                'product_description'  => $product_description,
+                'product_more_image'  => serialize(array($product_more_image)),
+                'product_image'     => $product_image,
+                'product_promotion'   => $product_promotion,
+                'product_includedvat'  => $product_includedvat,
+                'product_price'  => $product_price,
+                'product_quantity'     => $product_quantity,
+                'product_category_id'   => $product_category_id,
+                'product_detail'  => $product_detail,
+                'product_status'  => $product_status,
+                'product_viewcount'     => $product_viewcount,
+                'product_rate'   => $product_rate,
+                'product_material'  => $product_material,
+                'product_size'     => $product_size,
+                'sex'   => $product_sex,
+            ]);
+        $res = Product::where('product_id', '=', $request['product_id'])->get();
+
+        return response()->json($res);
     }
     public function listProductName()
     {
@@ -247,5 +299,24 @@ class ProductController extends Controller
             $res->sex = $item->sex;
         }
         return $res;
+    }
+    public function delete(Request $request)
+    {
+        $product = new Product;
+        if ($request['product_id'] > 0) {
+            $data = $product->where('product_id', '=', $request['product_id'])->delete();
+            $response = array_merge([
+                'code'   => 200,
+                'status' => 'success',
+                // 'data' => $data
+            ]);
+            return response()->json($response, $response['code']);
+        } else {
+            $error = [
+                "status"    => "error",
+                "message"   => "Mã thương hiệu không tồn tại",
+                "errorCode" => null,
+            ];
+        }
     }
 }

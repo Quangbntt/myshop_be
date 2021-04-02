@@ -47,6 +47,9 @@ use Illuminate\Support\Facades\Route;
         Route::get('same', 'ProductController@sameProduct');
         Route::get('list-admin', 'ProductController@listProductAdmin');
         Route::post('delete', 'ProductController@delete');
+        Route::post('child-create', 'ProductController@createChild');
+        Route::post('child-update', 'ProductController@updateChild');
+        Route::post('child-delete', 'ProductController@deleteChild');
 
     });
     Route::group(['prefix'=>'branch','namespace' =>'Branch'], function () {

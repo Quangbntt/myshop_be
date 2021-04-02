@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\ProductSize;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -72,7 +73,8 @@ class ProductController extends Controller
                     'color',
                     'size_name as size_name',
                     'product_count as product_count',
-                    'product_sizes.created_at as created_at'
+                    'product_sizes.created_at as created_at',
+                    'products.product_id as product_id'
                 )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $item->product_id)->get();
             $item->product = $dataChild;
         }
@@ -197,6 +199,10 @@ class ProductController extends Controller
     {
         $data = $request->all();
 
+        $query = DB::table('products')
+            ->select('product_quantity')
+            ->where('product_id', '=', $data['product_id'])->get();
+
         $size_id = (!empty($data['size_id'])) ? $data['size_id'] : 0;
         $product_name = (!empty($data['product_name'])) ? $data['product_name'] : '';
         $product_code = (!empty($data['product_code'])) ? $data['product_code'] : '';
@@ -207,7 +213,7 @@ class ProductController extends Controller
         $product_promotion = (!empty($data['product_promotion'])) ? $data['product_promotion'] : '';
         $product_includedvat = (!empty($data['product_includedvat'])) ? $data['product_includedvat'] : 1;
         $product_price = (!empty($data['product_price'])) ? $data['product_price'] : '';
-        $product_quantity = (!empty($data['product_quantity'])) ? $data['product_quantity'] : '';
+        $product_quantity = (!empty($data['product_quantity'])) ? $query[0]->product_quantity + $data['product_quantity'] : $query[0]->product_quantity;
         $product_category_id = (!empty($data['product_category_id'])) ? $data['product_category_id'] : '';
         $product_detail = (!empty($data['product_detail'])) ? $data['product_detail'] : 'NULL';
         $product_status = (!empty($data['product_status'])) ? $data['product_status'] : 1;
@@ -305,6 +311,69 @@ class ProductController extends Controller
         $product = new Product;
         if ($request['product_id'] > 0) {
             $data = $product->where('product_id', '=', $request['product_id'])->delete();
+            $response = array_merge([
+                'code'   => 200,
+                'status' => 'success',
+                // 'data' => $data
+            ]);
+            return response()->json($response, $response['code']);
+        } else {
+            $error = [
+                "status"    => "error",
+                "message"   => "Mã thương hiệu không tồn tại",
+                "errorCode" => null,
+            ];
+        }
+    }
+    //Api tạo mới số lượng sản phẩm
+    public function createChild(Request $request)
+    {
+        $data = $request->all();
+        $product = new ProductSize();
+
+        $product_id = (!empty($data['product_id'])) ? $data['product_id'] : 0;
+        $color = (!empty($data['color'])) ? $data['color'] : '';
+        $size_name = (!empty($data['size_name'])) ? $data['size_name'] : '';
+        $product_count = (!empty($data['product_count'])) ? $data['product_count'] : '';
+
+        $product->product_id = $product_id;
+        $product->color = $color;
+        $product->size_name = $size_name;
+        $product->product_count = $product_count;
+        $product->save();
+    }
+    //Api cập nhật số lượng sản phẩm
+    public function updateChild(Request $request)
+    {
+        $data = $request->all();
+
+        $query = DB::table('product_sizes')
+            ->select('product_count')
+            ->where('size_id', '=', $data['id'])
+            ->get();
+
+        $color = (!empty($data['color'])) ? $data['color'] : '';
+        $size_name = (!empty($data['size_name'])) ? $data['size_name'] : '';
+        $product_count = (!empty($data['product_count'])) ? $query[0]->product_count + $data['product_count'] : $query[0]->product_count;
+
+        DB::table('product_sizes')
+            ->where('size_id', '=', $data['id'])
+            ->update([
+                'color'  => $color,
+                'size_name'  => $size_name,
+                'product_count'     => $product_count,
+                'updated_at' => date("Y-m-d h:m:s")
+            ]);
+        $res = ProductSize::where('size_id', '=', $request['id'])->get();
+
+        return response()->json($res);
+    }
+    //Api xóa số lượng sản phẩm
+    public function deleteChild(Request $request)
+    {
+        $product = new ProductSize;
+        if ($request['id'] > 0) {
+            $data = $product->where('size_id', '=', $request['id'])->delete();
             $response = array_merge([
                 'code'   => 200,
                 'status' => 'success',

@@ -303,6 +303,24 @@ class ProductController extends Controller
             $res->product_size = $item->product_size;
             $res->created_at = $item->created_at;
             $res->sex = $item->sex;
+            $dataSize = DB::table('product_sizes')
+                ->select(
+                    // 'product_sizes.size_id as id',
+                    'size_name as size_name',
+                )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $id)->groupBy('size_name')->get();
+            $res->size = $dataSize;
+            $dataColor = DB::table('product_sizes')
+                ->select(
+                    // 'product_sizes.size_id as id',
+                    'color',
+                )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $id)->groupBy('color')->get();
+            $res->color = $dataColor;
+            $dataCount = DB::table('product_sizes')
+                ->select(
+                    'product_sizes.size_id as id',
+                    'product_count as product_count',
+                )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $id)->get();
+            $res->count = $dataCount;
         }
         return $res;
     }

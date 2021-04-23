@@ -25,13 +25,18 @@ use Illuminate\Support\Facades\Route;
         Route::get('all', 'UserController@index');
         Route::post('create', 'UserController@create');
         Route::post('update', 'UserController@update');
+        Route::post('client-update', 'UserController@updateClient');
         Route::post('delete', 'UserController@delete');
+        Route::get('detail/{id}', 'UserController@detail');
         Route::get('getUserInfor', 'UserController@getUserInfor');
         Route::get('getUserPhone', 'UserController@getUserPhone');
         Route::get('changeStatus','UserController@changeStatus');
     });
     Route::group(['prefix'=>'role','namespace' =>'Role'], function () {
         Route::get('getAll', 'RoleController@getAll');
+    });
+    Route::group(['prefix'=>'shipplace','namespace' =>'ShipPlace'], function () {
+        Route::get('ship-place', 'ShipPlaceController@getShipPlace');
     });
     Route::group(['prefix'=>'product','namespace' =>'Product'], function () {
         Route::get('all', 'ProductController@index');

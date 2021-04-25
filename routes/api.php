@@ -37,6 +37,10 @@ use Illuminate\Support\Facades\Route;
     });
     Route::group(['prefix'=>'shipplace','namespace' =>'ShipPlace'], function () {
         Route::get('ship-place', 'ShipPlaceController@getShipPlace');
+        Route::post('delete', 'ShipPlaceController@delete');
+        Route::post('create', 'ShipPlaceController@create');
+        Route::post('update', 'ShipPlaceController@update');
+        Route::post('default', 'ShipPlaceController@default');
     });
     Route::group(['prefix'=>'product','namespace' =>'Product'], function () {
         Route::get('all', 'ProductController@index');

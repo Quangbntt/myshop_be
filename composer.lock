@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5724dfca62d684ebe978722220eb8703",
+    "content-hash": "1bc1fd540de6b9b0cd40da81069f2764",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1027,6 +1027,73 @@
             "time": "2020-09-30T07:37:11+00:00"
         },
         {
+            "name": "hoangphi/vietnam-maps",
+            "version": "v1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hoangphidev/vietnam-maps.git",
+                "reference": "d0c212113fb844ba055722ab3d636790ce1aa7a4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hoangphidev/vietnam-maps/zipball/d0c212113fb844ba055722ab3d636790ce1aa7a4",
+                "reference": "d0c212113fb844ba055722ab3d636790ce1aa7a4",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.0.1",
+                "illuminate/console": "^5.8|^6|^7|^8",
+                "illuminate/database": "^5.8|^6|^7|^8",
+                "illuminate/support": "^5.8|^6|^7|^8",
+                "maatwebsite/excel": "^3.1",
+                "php": "^7.2|^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "HoangPhi\\VietnamMap\\VietnamMapServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "HoangPhi\\VietnamMap\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Phi Hoang",
+                    "email": "hoangphi.dev@gmail.com",
+                    "homepage": "https://github.com/hoangphidev/vietnam-maps",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Vietnam's area database.",
+            "homepage": "https://github.com/hoangphidev/vietnam-maps",
+            "keywords": [
+                "hanhchinhvietnam",
+                "hcvn",
+                "hoangphidev",
+                "laravel",
+                "laravel-package",
+                "laravel-package-vietnam",
+                "laravel-vietnam-maps",
+                "vietnam-database",
+                "vietnam-maps",
+                "vietnam-zone"
+            ],
+            "support": {
+                "issues": "https://github.com/hoangphidev/vietnam-maps/issues",
+                "source": "https://github.com/hoangphidev/vietnam-maps/tree/v1.3"
+            },
+            "time": "2021-02-25T07:13:13+00:00"
+        },
+        {
             "name": "huddledigital/zendesk-laravel",
             "version": "3.5",
             "source": {
@@ -1148,6 +1215,57 @@
                 "source": "https://github.com/Intervention/image/tree/master"
             },
             "time": "2019-11-02T09:15:47+00:00"
+        },
+        {
+            "name": "kjmtrue/vietnam-zone",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kjmtrue/vietnam-zone.git",
+                "reference": "3e386b7ad25fe257692fb075d63d549c4e7cc1e8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kjmtrue/vietnam-zone/zipball/3e386b7ad25fe257692fb075d63d549c4e7cc1e8",
+                "reference": "3e386b7ad25fe257692fb075d63d549c4e7cc1e8",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^6.3.1|^7.0",
+                "illuminate/console": "^5.8|^6|^7",
+                "illuminate/database": "^5.8|^6|^7",
+                "illuminate/support": "^5.8|^6|^7",
+                "maatwebsite/excel": "^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Kjmtrue\\VietnamZone\\ServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Kjmtrue\\VietnamZone\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "KimTrien",
+                    "email": "kimtrien@gmail.com"
+                }
+            ],
+            "description": "VietNam Zone",
+            "support": {
+                "issues": "https://github.com/kjmtrue/vietnam-zone/issues",
+                "source": "https://github.com/kjmtrue/vietnam-zone/tree/master"
+            },
+            "time": "2020-06-16T17:43:57+00:00"
         },
         {
             "name": "laravel/framework",

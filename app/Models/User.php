@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class User extends Model
 {
+    protected $table      = "users";
     protected $fillable = [
         'id',
         'username',
@@ -26,5 +27,9 @@ class User extends Model
             $user->token = md5(base64_encode($user->name).'.'.base64_encode($user->password).'.'.base64_encode($user->id));
             $user->save();
         });
+    }
+    public function shipPlace()
+    {
+        return $this->hasMany(ShipPlace::class, 'user_id', 'id');
     }
 }

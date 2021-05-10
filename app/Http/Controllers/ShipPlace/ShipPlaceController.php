@@ -20,6 +20,17 @@ class ShipPlaceController extends Controller
         $res = $data->paginate($request['per_page'] ?? 10);
         return response()->json($res);
     }
+    public function listDefault(Request $request)
+    {
+        $id = $request->get('id');
+        $data = DB::table('shipplace')
+            ->selectRaw('shipplace.id, shipplace.address, users.name, users.phone')
+            ->join('users', 'users.id', 'user_id')
+            ->where('user_id', $id)
+            ->where('default', 1)
+            ->get();
+        return response()->json($data);
+    }
     public function delete(Request $request)
     {
         $shipPlace = new ShipPlace();
@@ -47,6 +58,8 @@ class ShipPlaceController extends Controller
         $shipPlace = new ShipPlace();
         $user_id = (!empty($data['user_id'])) ? $data['user_id'] : '';
         $address = (!empty($data['address'])) ? $data['address'] : '';
+        $lat = (!empty($data['lat'])) ? $data['lat'] : '';
+        $long = (!empty($data['long'])) ? $data['long'] : '';
 
         $dataCheck = DB::table('shipplace')
             ->where('user_id', '=', $user_id)
@@ -55,6 +68,8 @@ class ShipPlaceController extends Controller
         if (!empty($user_id) && !empty($shipPlace)) {
             $shipPlace->user_id         = $user_id;
             $shipPlace->address         = $address;
+            $shipPlace->lat             = $lat;
+            $shipPlace->long            = $long;
             $shipPlace->default         = $count > 0 ? 0 : 1;
             $shipPlace->save();
         } else {
@@ -67,6 +82,8 @@ class ShipPlaceController extends Controller
         $data = $request->all();
         $user_id = (!empty($data['user_id'])) ? $data['user_id'] : '';
         $address = (!empty($data['address'])) ? $data['address'] : '';
+        $lat = (!empty($data['lat'])) ? $data['lat'] : '';
+        $long = (!empty($data['long'])) ? $data['long'] : '';
 
         // DB::table('shipplace')
         //     ->where('user_id', '=', $data['user_id'])
@@ -77,7 +94,9 @@ class ShipPlaceController extends Controller
         DB::table('shipplace')
             ->where('id', '=', $data['id'])
             ->update([
-                'address'          => $address,
+                'address'           => $address,
+                'lat'               => $lat,
+                'long'              => $long,
             ]);
         $res = ShipPlace::where('user_id', '=', $request['user_id'])->get();
 
@@ -86,7 +105,6 @@ class ShipPlaceController extends Controller
     public function default(Request $request)
     {
         $data = $request->all();
-
         DB::table('shipplace')
             ->where('user_id', '=', $data['user_id'])
             ->update([

@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\UserSocial;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -59,6 +61,7 @@ class UserController extends Controller
         $data = $request->all();
         $user = new User;
         $hash = rand(10000, 99999);
+        $uuId = Str::uuid()->toString();
         $username = (!empty($data['username'])) ? $data['username'] : '';
         $password = (!empty($data['password'])) ? md5($data['password'] . $hash) : '';
         $groupid = (!empty($data['groupid'])) ? $data['groupid'] : 3;
@@ -99,6 +102,7 @@ class UserController extends Controller
 
         if (!empty($phone) && !empty($email)) {
             $user->username         = $username;
+            $user->uuId         = $uuId;
             $user->token            = '';
             $user->password         = $password;
             $user->groupid          = $groupid;
@@ -169,6 +173,7 @@ class UserController extends Controller
     //update client
     public function updateClient(Request $request)
     {
+
         $data       = $request->all();
         $name       = (!empty($data['name'])) ? $data['name'] : '';
         $about_me   = (!empty($data['about_me'])) ? $data['about_me'] : 'NULL';
@@ -177,8 +182,29 @@ class UserController extends Controller
         $phone      = (!empty($data['phone'])) ? $data['phone'] : '';
         $sex        = (!empty($data['sex'])) ? $data['sex'] : 3;
         $user_image = (!empty($data['user_image'])) ? $data['user_image'] : '';
+        $familyName = (!empty($data['familyName'])) ? $data['familyName'] : '';
+        $givenName = (!empty($data['givenName'])) ? $data['givenName'] : '';
+        $image = (!empty($data['image'])) ? $data['image'] : '';
         $birthday   = (!empty($data['birthday'])) ? $data['birthday'] : date("y-m-d");
 
+        if(strlen($data['id']) > 10) {
+            DB::table('user_socials')
+            ->where('uuId', '=', $data['id'])
+            ->update([
+                'email'             => $email,
+                'familyName'        => $familyName,
+                'givenName'         => $givenName,
+                'name'              => $name,
+                'image'             => $image,
+                'address'           => $address,
+                'phone'             => $phone,
+                'sex'               => $sex,
+                'updated_at'        => date("y-m-d h:m:s")
+            ]);
+        $res = UserSocial::where('uuId', '=', $request['id'])->get();
+
+        return response()->json($res);
+        }
         DB::table('users')
             ->where('id', '=', $data['id'])
             ->update([
@@ -198,7 +224,23 @@ class UserController extends Controller
         return response()->json($res);
     }
 
-    public function detail(Request $request) {
+    public function detail(Request $request)
+    {
+        $id = $request['id'];
+        if (strlen($id)) {
+            $res = User::where('uuId', '=', $request['id'])->get();
+            return response()->json($res);
+        }
+        $res = User::where('id', '=', $request['id'])->get();
+        return response()->json($res);
+    }
+    public function detailClient(Request $request)
+    {
+        $id = $request['id'];
+        if (strlen($id)) {
+            $res = User::where('id', '=', $request['id'])->get();
+            return response()->json($res);
+        }
         $res = User::where('id', '=', $request['id'])->get();
         return response()->json($res);
     }

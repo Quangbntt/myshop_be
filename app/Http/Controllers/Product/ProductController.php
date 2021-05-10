@@ -259,6 +259,15 @@ class ProductController extends Controller
         ];
         return response()->json($response);
     }
+    public function listProductNameFilter()
+    {
+        $data = DB::table('products')
+            ->select('product_id as id', 'product_name as name')->get();
+        $response = [
+            'data' => $data
+        ];
+        return response()->json($response);
+    }
     public function searchProduct(Request $request)
     {
         $name = $request->get('name');
@@ -273,56 +282,92 @@ class ProductController extends Controller
             return response()->json($arrReturn);
         }
     }
+    public function searchProductClient(Request $request)
+    {
+        $name = $request->get('name');
+        if ($name) {
+            $data = DB::table('products')
+                ->selectRaw('product_id as value, product_name as label');
+            $data = $data->where('product_name', 'LIKE', '%' . $name . '%');
+            $data = $data->paginate(10);
+            return response()->json($data);
+        } else {
+            $arrReturn['data'] = [];
+            return response()->json($arrReturn);
+        }
+    }
     public function productDetail(Request $request)
     {
         $id = $request->get('id');
-        $data = DB::table('products')->where('product_id', $id)->get();
+        $data = DB::table('products')
+            ->selectRaw('products.product_id, size_id, product_name, product_code, product_metatitle, product_description, product_more_image, product_image,
+        product_promotion, product_includedvat, product_price, product_quantity, product_category_id, product_detail, product_status, product_viewcount,
+        product_rate, product_material, product_size, products.created_at, sex, promotion_details.discount')
+            ->join('promotion_details', 'promotion_details.product_id', 'products.product_id')
+            // ->where('promotion_details.status', 1)
+            ->where('promotion_details.product_id', $id)
+            ->where('products.product_id', $id)
+            ->orderByDesc('promotion_details.created_at')->first();
         $res = new Product();
-        // $data = $data->paginate(10);
-        foreach ($data as $key => $item) {
-            $res->product_id = $item->product_id;
-            $res->size_id = $item->size_id;
-            $res->product_name = $item->product_name;
-            $res->product_code = $item->product_code;
-            $res->product_metatitle = $item->product_metatitle;
-            $res->product_description = $item->product_description;
-            foreach (unserialize($item->product_more_image) as $index => $itemC) {
-                $res->product_more_image = $itemC;
-            }
-            $res->product_image = $item->product_image;
-            $res->product_promotion = $item->product_promotion;
-            $res->product_includedvat = $item->product_includedvat;
-            $res->product_price = $item->product_price;
-            $res->product_quantity = $item->product_quantity;
-            $res->product_category_id = $item->product_category_id;
-            $res->product_detail = $item->product_detail;
-            $res->product_status = $item->product_status;
-            $res->product_viewcount = $item->product_viewcount;
-            $res->product_rate = $item->product_rate;
-            $res->product_material = $item->product_material;
-            $res->product_size = $item->product_size;
-            $res->created_at = $item->created_at;
-            $res->sex = $item->sex;
-            $dataSize = DB::table('product_sizes')
-                ->select(
-                    // 'product_sizes.size_id as id',
-                    'size_name as size_name',
-                )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $id)->groupBy('size_name')->get();
-            $res->size = $dataSize;
-            $dataColor = DB::table('product_sizes')
-                ->select(
-                    // 'product_sizes.size_id as id',
-                    'color',
-                )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $id)->groupBy('color')->get();
-            $res->color = $dataColor;
-            $dataCount = DB::table('product_sizes')
-                ->select(
-                    'product_sizes.size_id as id',
-                    'product_count as product_count',
-                )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $id)->get();
-            $res->count = $dataCount;
+        $res->product_id = $data->product_id;
+        $res->size_id = $data->size_id;
+        $res->product_name = $data->product_name;
+        $res->product_code = $data->product_code;
+        $res->product_metatitle = $data->product_metatitle;
+        $res->product_description = $data->product_description;
+        foreach (unserialize($data->product_more_image) as $index => $itemC) {
+            $res->product_more_image = $itemC;
         }
+        $res->product_image = $data->product_image;
+        $res->product_promotion = $data->product_promotion;
+        $res->product_includedvat = $data->product_includedvat;
+        $res->product_price = $data->product_price;
+        $res->product_quantity = $data->product_quantity;
+        $res->product_category_id = $data->product_category_id;
+        $res->product_detail = $data->product_detail;
+        $res->product_status = $data->product_status;
+        $res->product_viewcount = $data->product_viewcount;
+        $res->product_rate = $data->product_rate;
+        $res->product_material = $data->product_material;
+        $res->product_size = $data->product_size;
+        $res->created_at = $data->created_at;
+        $res->sex = $data->sex;
+        $res->discount = $data->discount;
+        $dataSize = DB::table('product_sizes')
+            ->select(
+                // 'product_sizes.size_id as value',
+                'size_name as label',
+                'size_name as value',
+            )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $id)->groupBy('size_name')->get();
+
+        $res->size = $dataSize;
+
+        $dataColor = DB::table('product_sizes')
+            ->select(
+                // 'product_sizes.size_id',
+                'color as label',
+                'color as value',
+            )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $id)->groupBy('color')->get();
+        $res->color = $dataColor;
+        $dataCount = DB::table('product_sizes')
+            ->select(
+                'product_sizes.size_id as id',
+                'product_count as product_count',
+            )->join('products', 'products.product_id', '=', 'product_sizes.product_id')->where('product_sizes.product_id', $id)->get();
+        $res->count = $dataCount;
         return $res;
+    }
+    public function findColor(Request $request)
+    {
+        $size_name = $request->get('size_name') ? $request->get('size_name') : '';
+        $product_id = $request->get('product_id') ? $request->get('product_id') : '';
+        $data = DB::table('product_sizes')
+            ->select('color as value', 'color as label')
+            ->where('product_id', $product_id)
+            ->where('size_name', $size_name)
+            ->get();
+        $res['data'] = $data;
+        return response()->json($res);
     }
     public function delete(Request $request)
     {

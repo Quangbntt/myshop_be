@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateShipplaceTable extends Migration
+class CreateFeedbackProductsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateShipplaceTable extends Migration
      */
     public function up()
     {
-        Schema::create('shipplace', function (Blueprint $table) {
+        Schema::create('feedback_products', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('user_id');
-            $table->string('address');
-            $table->boolean('default');
-            $table->double('lat', 20, 10);
-            $table->double('long', 20, 10);
+            $table->bigInteger('product_id');
+            $table->bigInteger('customer_id');
+            $table->longText('comment');
+            $table->longText('images');
+            $table->double('rate', 15, 8);
             $table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ class CreateShipplaceTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('shipplace');
+        Schema::dropIfExists('feedback_products');
     }
 }

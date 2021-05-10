@@ -13,6 +13,8 @@ class ShipPlace extends Model
         'user_id',
         'address',
         'default',
+        'lat',
+        'long',
         'created_at',
         'updated_at'
     ];

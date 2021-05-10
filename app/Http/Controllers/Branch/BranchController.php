@@ -20,7 +20,7 @@ class BranchController extends Controller
         $data = DB::table('branches')
             ->select('branches.branches_id', 'branches.branches_image', 'branches.branches_name', DB::raw('count(*) as total'))
             ->join('products', 'products.product_code', '=', 'branches.branches_id')
-            ->where('branches_id', 1)
+            ->where('branches_type', 1)
             ->groupBy('branches_id', 'branches_name', 'branches_image')
             ->get();
         return response()->json($data);
@@ -62,9 +62,9 @@ class BranchController extends Controller
 
     public function delete(Request $request)
     {
-        $user = new Branch;
+        $branch = new Branch;
         if ($request['branches_id'] > 0) {
-            $data = $user->where('branches_id', '=', $request['branches_id'])->delete();
+            $data = $branch->where('branches_id', '=', $request['branches_id'])->delete();
         } else {
             $error = [
                 "status"    => "error",

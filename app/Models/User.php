@@ -20,6 +20,9 @@ class User extends Model
         'phone',
         'token',
         'status',
+        'province_id',
+        'district_id',
+        'ward_id',
     ];
 
     public static function boot() {

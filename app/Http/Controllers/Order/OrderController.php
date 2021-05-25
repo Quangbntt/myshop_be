@@ -15,12 +15,13 @@ use Illuminate\Support\Facades\DB;
 class OrderController extends Controller
 {
     //Order status
-    //1: Đang giao
-    //2: Đã nhận
-    //3: Đã hủy
+    //  1: Đang giao
+    //  2: Đã nhận
+    //  3: Đã hủy
+    //  4: Người gửi gửi hàng
     //Order type
-    //1: Đang trong giỏ hàng
-    //2: Đơn đã đặt
+    //  1: Đang trong giỏ hàng
+    //  2: Đơn đã đặt
     public function getAdminOrder(Request $request)
     {
         $data = DB::table('orders')
@@ -38,7 +39,7 @@ class OrderController extends Controller
             $data = $data->where('products.product_category_id', $request->get('category'));
         }
 
-        $res = $data->paginate($request['size'] ?? 10);
+        $res = $data->orderByDesc('orders_id')->paginate($request['size'] ?? 10);
         return response()->json($res);
     }
 
@@ -80,9 +81,29 @@ class OrderController extends Controller
         $product_cost = $request->get('product_cost');
         $product_price = $request->get('product_price');
         $orders_status = $request->get('orders_status');
+        $cart_id = $request->get('cart_id');
         $product_size_id = $request->get('product_size_id');
         $orders_quantity = $request->get('orders_quantity');
         $user_id = $request->get('user_id');
+        $arrCart = [];
+        for ($i = 0; $i < count($cart_id); $i++) {
+            $cart = Cart::selectRaw('id, quantity')->where('id', $cart_id[$i])->first();
+            array_push($arrCart, $cart->quantity);
+            DB::table('carts')
+                ->where('id', '=', $cart_id[$i])
+                ->update([
+                    'quantity'     => $orders_quantity[$i]
+                ]);
+            $search = DB::table('product_sizes')
+                ->select('size_id', 'product_count')
+                ->where('size_id', $product_size_id[$i])
+                ->first();
+            if ($search->product_count < $orders_quantity[$i]) {
+                $orders_quantity = "";
+                $message = "Số lượng sản phẩm còn lại không đủ";
+            }
+            $this->minusOrder($search, $orders_quantity[$i], $cart->quantity);
+        }
 
         for ($i = 0; $i < count($product_cost); $i++) {
             $orders = new Order();
@@ -101,6 +122,16 @@ class OrderController extends Controller
             $row->status = 2;
             $row->save();
         }
+    }
+    public function minusOrder($search, $quantity, $cart_quantity)
+    {
+        $search->product_count = $search->product_count - $quantity + $cart_quantity;
+
+        DB::table('product_sizes')
+            ->where('size_id', '=', $search->size_id)
+            ->update([
+                'product_count'          => $search->product_count,
+            ]);
     }
     public function delete(Request $request)
     {

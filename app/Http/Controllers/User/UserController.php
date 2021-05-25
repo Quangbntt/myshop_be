@@ -6,7 +6,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Models\District;
+use App\Models\Province;
 use App\Models\UserSocial;
+use App\Models\Ward;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -70,11 +73,27 @@ class UserController extends Controller
         $email = (!empty($data['email'])) ? $data['email'] : '';
         $phone = (!empty($data['phone'])) ? $data['phone'] : '';
         $status = (!empty($data['status'])) ? $data['status'] : 1;
+        $province_id = (!empty($data['province_id'])) ? $data['province_id'] : '';
+        $district_id = (!empty($data['district_id'])) ? $data['district_id'] : '';
+        $ward_id = (!empty($data['ward_id'])) ? $data['ward_id'] : '';
         //1: nữ 2: Nam 3: Khác
         $sex = (!empty($data['sex'])) ? $data['sex'] : 3;
         $user_image = (!empty($data['user_image'])) ? $data['user_image'] : 'https://via.placeholder.com/100x100';
         $background_image = (!empty($data['background_image'])) ? $data['background_image'] : 'https://via.placeholder.com/400x200';
         $birthday = (!empty($data['birthday'])) ? $data['birthday'] : date("y-m-d");
+
+        if ($province_id) {
+            $dataProvince = Province::select('name')
+                ->where('id', $province_id)
+                ->firstOrFail();
+            $dataDistrict = District::select('name')
+                ->where('id', $district_id)
+                ->firstOrFail();
+            $dataWard = Ward::select('name')
+                ->where('id', $ward_id)
+                ->firstOrFail();
+            $dataAdress = $dataWard->name . " - " . $dataDistrict->name . " - " . $dataProvince->name;
+        }
 
         $dataPhone = DB::table('users')
             ->select('phone')
@@ -86,6 +105,20 @@ class UserController extends Controller
         } else {
             $phone = "";
             $message = "Số điện thoại đã tồn tại";
+        }
+
+        $dataUserName = DB::table('users')
+            ->select('username')
+            ->where('username', $username)
+            ->groupBy('username')
+            ->get();
+        if (count($dataUserName) === 0) {
+            $username = $username;
+        } else {
+            $username = "";
+            $message = "Tên đăng nhập đã tồn tại";
+            $result['message'] = $message;
+            return response()->json($result, 401);
         }
 
         $dataEmail = DB::table('users')
@@ -100,14 +133,16 @@ class UserController extends Controller
             $message = "Email đã tồn tại";
         }
 
+
+
         if (!empty($phone) && !empty($email)) {
             $user->username         = $username;
-            $user->uuId         = $uuId;
+            $user->uuId             = $uuId;
             $user->token            = '';
             $user->password         = $password;
             $user->groupid          = $groupid;
             $user->name             = $name;
-            $user->address          = $address;
+            $user->address          = $address ? $address : $dataAdress;
             $user->email            = $email;
             $user->hash             = $hash;
             $user->phone            = $phone;
@@ -116,6 +151,9 @@ class UserController extends Controller
             $user->background_image = $background_image;
             $user->birthday         = $birthday;
             $user->sex              = $sex;
+            $user->province_id      = $province_id;
+            $user->district_id      = $district_id;
+            $user->ward_id          = $ward_id;
             $user->save();
         } else {
             $result['message'] = $message;
@@ -145,6 +183,23 @@ class UserController extends Controller
         $background_image = (!empty($data['background_image'])) ? $data['background_image'] : 'https://via.placeholder.com/400x200';
         $birthday = (!empty($data['birthday'])) ? $data['birthday'] : date("y-m-d");
         $token = md5(base64_encode($name) . '.' . base64_encode($password) . '.' . base64_encode($data['id']));
+        $province_id = (!empty($data['province_id'])) ? $data['province_id'] : '';
+        $district_id = (!empty($data['district_id'])) ? $data['district_id'] : '';
+        $ward_id = (!empty($data['ward_id'])) ? $data['ward_id'] : '';
+
+        $dataUserName = DB::table('users')
+            ->select('username')
+            ->where('username', $username)
+            ->groupBy('username')
+            ->get();
+        if (count($dataUserName) === 0) {
+            $username = $username;
+        } else {
+            $username = "";
+            $message = "Tên đăng nhập đã tồn tại";
+            $result['message'] = $message;
+            return response()->json($result, 401);
+        }
 
         DB::table('users')
             ->where('id', '=', $data['id'])
@@ -155,13 +210,16 @@ class UserController extends Controller
                 'groupid'           => $groupid,
                 'name'              => $name,
                 'user_image'        => $user_image,
-                'background_image'  =>  $background_image,
+                'background_image'  => $background_image,
                 'birthday'          => $birthday,
                 'address'           => $address,
                 'email'             => $email,
                 'hash'              => $hash,
                 'phone'             => $phone,
                 'sex'               => $sex,
+                'province_id'       => $province_id,
+                'district_id'       => $district_id,
+                'ward_id'           => $ward_id,
                 'updated_at'        => date("y-m-d h:m:s"),
                 'status'            => $data['status']
             ]);
@@ -186,24 +244,60 @@ class UserController extends Controller
         $givenName = (!empty($data['givenName'])) ? $data['givenName'] : '';
         $image = (!empty($data['image'])) ? $data['image'] : '';
         $birthday   = (!empty($data['birthday'])) ? $data['birthday'] : date("y-m-d");
+        $province_id = (!empty($data['province_id'])) ? $data['province_id'] : '';
+        $district_id = (!empty($data['district_id'])) ? $data['district_id'] : '';
+        $ward_id = (!empty($data['ward_id'])) ? $data['ward_id'] : '';
 
-        if(strlen($data['id']) > 10) {
+        $dataPhone = DB::table('users')
+            ->select('phone')
+            ->where('phone', $phone)
+            ->where('id', '!=', $data['id'])
+            ->groupBy('phone')
+            ->get();
+        if (count($dataPhone) === 0) {
+            $phone = $phone;
+        } else {
+            $phone = "";
+            $message = "Số điện thoại đã tồn tại";
+            $result['message'] = $message;
+            return response()->json($result, 401);
+        }
+
+        $dataEmail = DB::table('users')
+            ->select('email')
+            ->where('email', $email)
+            ->where('id', '!=', $data['id'])
+            ->groupBy('email')
+            ->get();
+        if (count($dataEmail) === 0) {
+            $email = $email;
+        } else {
+            $email = "";
+            $message = "Email đã tồn tại";
+            $result['message'] = $message;
+            return response()->json($result, 401);
+        }
+
+        if (strlen($data['id']) > 10) {
             DB::table('user_socials')
-            ->where('uuId', '=', $data['id'])
-            ->update([
-                'email'             => $email,
-                'familyName'        => $familyName,
-                'givenName'         => $givenName,
-                'name'              => $name,
-                'image'             => $image,
-                'address'           => $address,
-                'phone'             => $phone,
-                'sex'               => $sex,
-                'updated_at'        => date("y-m-d h:m:s")
-            ]);
-        $res = UserSocial::where('uuId', '=', $request['id'])->get();
+                ->where('uuId', '=', $data['id'])
+                ->update([
+                    'email'             => $email,
+                    'familyName'        => $familyName,
+                    'givenName'         => $givenName,
+                    'name'              => $name,
+                    'image'             => $image,
+                    'address'           => $address,
+                    'phone'             => $phone,
+                    'sex'               => $sex,
+                    'province_id'       => $province_id,
+                    'district_id'       => $district_id,
+                    'ward_id'           => $ward_id,
+                    'updated_at'        => date("y-m-d h:m:s")
+                ]);
+            $res = UserSocial::where('uuId', '=', $request['id'])->get();
 
-        return response()->json($res);
+            return response()->json($res);
         }
         DB::table('users')
             ->where('id', '=', $data['id'])
@@ -216,6 +310,9 @@ class UserController extends Controller
                 'email'             => $email,
                 'phone'             => $phone,
                 'sex'               => $sex,
+                'province_id'       => $province_id,
+                'district_id'       => $district_id,
+                'ward_id'           => $ward_id,
                 'updated_at'        => date("y-m-d h:m:s"),
                 'status'            => $data['status']
             ]);

@@ -37,6 +37,9 @@ use Illuminate\Support\Facades\Route;
     Route::group(['prefix'=>'role','namespace' =>'Role'], function () {
         Route::get('getAll', 'RoleController@getAll');
     });
+    Route::group(['prefix'=>'address','namespace' =>'Address'], function () {
+        Route::get('all', 'AddressController@index');
+    });
     Route::group(['prefix'=>'promotion','namespace' =>'Promotion'], function () {
         Route::get('all', 'PromotionController@index');
         Route::post('create', 'PromotionController@create');
@@ -68,6 +71,7 @@ use Illuminate\Support\Facades\Route;
         Route::get('get-order', 'OrderController@getOrder');
         Route::get('get-admin-order', 'OrderController@getAdminOrder');
         Route::get('report', 'OrderController@report');
+        Route::post('update-access', 'OrderController@updateAccess');
         Route::get('report-bar', 'OrderController@reportBar');
         Route::post('export-admin-order', 'OrderController@exportAdminOrder');
 

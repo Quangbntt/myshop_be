@@ -17,6 +17,7 @@ class Order extends Model
         'created_at',
         'updated_at',
         'orders_type',
-        'product_cost'
+        'product_cost',
+        'orders_access',
     ];
 }

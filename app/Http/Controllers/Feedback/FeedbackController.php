@@ -16,7 +16,7 @@ class FeedbackController extends Controller
      */
     public function index()
     {
-        $data = DB::table('feedback')
+        $data = DB::table('feedbacks')
             ->select(DB::raw(
                 'feedback_id,
                 feedback_comment,
@@ -27,7 +27,7 @@ class FeedbackController extends Controller
                 users.status,
                 users.user_image'
             ))
-            ->join('users', 'users.id', '=', 'feedback.feedback_customer_id')
+            ->join('users', 'users.id', '=', 'feedbacks.feedback_customer_id')
             ->where('users.status', 1)
             ->get();
         $arrReturn['data'] = $data;

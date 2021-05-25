@@ -118,7 +118,7 @@ class UserController extends Controller
             $username = "";
             $message = "Tên đăng nhập đã tồn tại";
             $result['message'] = $message;
-            return response()->json($result, 401);
+            return response()->json($result, 422);
         }
 
         $dataEmail = DB::table('users')

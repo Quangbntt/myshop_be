@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMenusesTable extends Migration
+class CreateMenusTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateMenusesTable extends Migration
      */
     public function up()
     {
-        Schema::create('menuses', function (Blueprint $table) {
+        Schema::create('menus', function (Blueprint $table) {
             $table->increments('menus_id');
             $table->string('menus_name');
             $table->string('menus_path');

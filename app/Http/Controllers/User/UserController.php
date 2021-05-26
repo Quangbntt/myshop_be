@@ -62,7 +62,6 @@ class UserController extends Controller
     public function create(Request $request)
     {
         $data = $request->all();
-        dd($request->get('username'));
         $user = new User;
         $hash = rand(10000, 99999);
         $uuId = Str::uuid()->toString();

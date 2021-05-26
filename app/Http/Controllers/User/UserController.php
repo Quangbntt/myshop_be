@@ -136,7 +136,7 @@ class UserController extends Controller
         if (!empty($phone) && !empty($email)) {
             $user->username         = $username;
             $user->uuId             = $uuId;
-            $user->token            = $uuId;
+            $user->token            = '';
             $user->password         = $password;
             $user->groupid          = $groupid;
             $user->name             = $name;

@@ -156,7 +156,7 @@ class UserController extends Controller
             $user->ward_id          = $ward_id;
             $user->save();
         } else {
-            $result['message'] = $message;
+            $result['message'] = "Tạo tài khoản không thành công";
             return response()->json($result, 401);
         }
     }

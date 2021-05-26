@@ -133,8 +133,7 @@ class UserController extends Controller
             $message = "Email đã tồn tại";
         }
 
-
-
+        dd($phone, $email);
         if (!empty($phone) && !empty($email)) {
             $user->username         = $username;
             $user->uuId             = $uuId;

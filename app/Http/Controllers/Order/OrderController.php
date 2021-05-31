@@ -211,7 +211,7 @@ class OrderController extends Controller
         $product_id = $request->get('product_id');
         $size_name = (int)($request->get('size_name'));
         $search = DB::table('product_sizes')
-            ->select('size_id', 'product_count')
+            ->select('size_id', 'product_count', 'product_id')
             ->where('color', $color)
             ->where('size_name', $size_name)
             ->where('product_id', $product_id)
@@ -220,6 +220,12 @@ class OrderController extends Controller
             $quantity = "";
             $message = "Số lượng sản phẩm còn lại không đủ";
         }
+        $productView = Product::select('product_viewcount')->where('product_id', $search[0]->product_id)->first();
+        $productViewCount = $productView->product_viewcount + 1;
+        Product::where('product_id', $search[0]->product_id)
+            ->update([
+                'product_viewcount' => $productViewCount
+            ]);
         $this->minusProduct($search, $quantity);
         $query = Cart::where('user_id', $user_id)->where('product_id', $search[0]->size_id)->where('status', 1)->where('discount', $discount)->first();
         if ($query === null) {

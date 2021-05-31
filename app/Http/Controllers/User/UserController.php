@@ -187,6 +187,7 @@ class UserController extends Controller
 
         $dataUserName = DB::table('users')
             ->select('username')
+            ->where('id', '!=', $data['id'])
             ->where('username', $username)
             ->groupBy('username')
             ->get();
@@ -195,6 +196,36 @@ class UserController extends Controller
         } else {
             $username = "";
             $message = "Tên đăng nhập đã tồn tại";
+            $result['message'] = $message;
+            return response()->json($result, 401);
+        }
+
+        $dataEmail = DB::table('users')
+            ->select('email')
+            ->where('id', '!=', $data['id'])
+            ->where('email', $email)
+            ->groupBy('email')
+            ->get();
+        if (count($dataEmail) === 0) {
+            $email = $email;
+        } else {
+            $email = "";
+            $message = "Email đã tồn tại";
+            $result['message'] = $message;
+            return response()->json($result, 401);
+        }
+
+        $dataPhone = DB::table('users')
+            ->select('phone')
+            ->where('id', '!=', $data['id'])
+            ->where('phone', $phone)
+            ->groupBy('phone')
+            ->get();
+        if (count($dataPhone) === 0) {
+            $phone = $phone;
+        } else {
+            $phone = "";
+            $message = "Số điện thoại đã tồn tại";
             $result['message'] = $message;
             return response()->json($result, 401);
         }

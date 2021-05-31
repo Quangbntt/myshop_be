@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ShipPlace extends Model
 {
     protected $table = 'shipplace';
-    protected $visible = ['id', 'address', 'default', 'created_at', 'updated_at'];
+    protected $visible = ['id', 'address', 'default', 'created_at', 'updated_at', 'lat', 'long'];
     protected $fillable = [
         'id',
         'user_id',

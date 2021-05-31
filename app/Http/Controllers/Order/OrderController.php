@@ -12,6 +12,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use function PHPUnit\Framework\isNull;
+
 class OrderController extends Controller
 {
     //Order status
@@ -219,17 +221,26 @@ class OrderController extends Controller
             $message = "Số lượng sản phẩm còn lại không đủ";
         }
         $this->minusProduct($search, $quantity);
-        if ($quantity > 0) {
-            $carts = new Cart();
-            $carts->user_id             = $user_id;
-            $carts->product_id          = $search[0]->size_id;
-            $carts->quantity            = $quantity;
-            $carts->discount            = $discount;
-            $carts->status              = 1;
-            $carts->save();
+        $query = Cart::where('user_id', $user_id)->where('product_id', $search[0]->size_id)->where('status', 1)->where('discount', $discount)->first();
+        if ($query === null) {
+            if ($quantity > 0) {
+                $carts = new Cart();
+                $carts->user_id             = $user_id;
+                $carts->product_id          = $search[0]->size_id;
+                $carts->quantity            = $quantity;
+                $carts->discount            = $discount;
+                $carts->status              = 1;
+                $carts->save();
+            } else {
+                $result['message'] = $message;
+                return response()->json($result, 500);
+            }
         } else {
-            $result['message'] = $message;
-            return response()->json($result, 500);
+            DB::table('carts')
+                ->where('id', '=', $query->id)
+                ->update([
+                    'quantity'          => $query->quantity + $quantity,
+                ]);
         }
     }
     public function minusProduct($search, $quantity)
@@ -258,8 +269,14 @@ class OrderController extends Controller
     }
     public function deleteCart(Request $request)
     {
+        $query = Cart::where('id', $request['id'])->first();
+        $product_size = ProductSize::where('size_id', $query->product_id)->first();
+        DB::table('product_sizes')
+            ->where('size_id', '=', $query->product_id)
+            ->update([
+                'product_count'          => $query->quantity + $product_size->product_count,
+            ]);
         $carts = new Cart();
-
         if ($request['id'] > 0) {
             $data = $carts->where('id', '=', $request['id'])->delete();
             $response = array_merge([
@@ -426,5 +443,12 @@ class OrderController extends Controller
         }
 
         return response()->json($response, $response['code']);
+    }
+    public function countCart(Request $request)
+    {
+        $user_id = $request->get('user_id');
+        $query = Cart::where('user_id', $user_id)->where('status', 1)->get();
+        $data['data'] = $query;
+        return response()->json($data);
     }
 }

@@ -21,7 +21,6 @@ class CreateCategoriesTable extends Migration
             $table->integer('categories_displayorder');
             $table->tinyInteger('categories_showonhome');
             $table->tinyInteger('categories_status');
-            $table->string('branches_code');
             $table->timestamps();
         });
     }

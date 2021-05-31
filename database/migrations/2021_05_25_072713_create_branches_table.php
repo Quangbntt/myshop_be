@@ -14,7 +14,7 @@ class CreateBranchesTable extends Migration
     public function up()
     {
         Schema::create('branches', function (Blueprint $table) {
-            $table->increments('id');
+            $table->increments('branches_id');
             $table->string('branches_name');
             $table->string('branches_image');
             $table->integer('branches_type');

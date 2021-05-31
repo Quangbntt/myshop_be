@@ -15,6 +15,7 @@ return [
 
     'default' => env('MAIL_MAILER', 'smtp'),
 
+
     /*
     |--------------------------------------------------------------------------
     | Mailer Configurations
@@ -36,11 +37,11 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
-            'port' => env('MAIL_PORT', 587),
+            'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+            'port' => env('MAIL_PORT', 2525),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
+            'username' => 'ndquangtt1@gmail.com',
+            'password' => 'quang20011999',
             'timeout' => null,
             'auth_mode' => null,
         ],
@@ -84,8 +85,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', 'ndquangtt1@gmail.com'),
+        'name' => env('MAIL_FROM_NAME', 'Cửa hàng giày dép Đắc Quang'),
     ],
 
     /*

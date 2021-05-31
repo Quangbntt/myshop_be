@@ -74,6 +74,7 @@ use Illuminate\Support\Facades\Route;
         Route::post('update-access', 'OrderController@updateAccess');
         Route::get('report-bar', 'OrderController@reportBar');
         Route::post('export-admin-order', 'OrderController@exportAdminOrder');
+        Route::get('count-cart', 'OrderController@countCart');
 
     });
     Route::group(['prefix'=>'shipplace','namespace' =>'ShipPlace'], function () {

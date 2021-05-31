@@ -33,6 +33,7 @@ class CreateProductsTable extends Migration
             $table->double('product_rate');
             $table->string('product_material');
             $table->longText('product_size');
+            $table->integer('sex');
             $table->timestamps();
         });
     }

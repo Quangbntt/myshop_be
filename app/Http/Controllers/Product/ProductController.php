@@ -399,11 +399,18 @@ class ProductController extends Controller
         $size_name = (!empty($data['size_name'])) ? $data['size_name'] : '';
         $product_count = (!empty($data['product_count'])) ? $data['product_count'] : '';
 
-        $product->product_id = $product_id;
-        $product->color = $color;
-        $product->size_name = $size_name;
-        $product->product_count = $product_count;
-        $product->save();
+        $query = ProductSize::where('product_id', $product_id)->where('color', $color)->where('size_name', $size_name)->first();
+        if (is_null($query)) {
+            $product->product_id = $product_id;
+            $product->color = $color;
+            $product->size_name = $size_name;
+            $product->product_count = $product_count;
+            $product->save();
+        } else {
+            $message = "Sản phẩm đã tồn tại";
+            $result['message'] = $message;
+            return response()->json($result, 422);
+        }
     }
     //Api cập nhật số lượng sản phẩm
     public function updateChild(Request $request)
